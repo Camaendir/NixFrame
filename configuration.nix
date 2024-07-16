@@ -38,7 +38,7 @@
     isNormalUser = true;
     hashedPasswordFile = config.sops.secrets."user/passwordHash".path;
     #initialPassword = "tmp_password";
-    extraGroups = [ "networkmanager" "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "networkmanager" "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
     packages = with pkgs; [
 	vim
@@ -90,6 +90,7 @@
  environment.persistence."/persist/system" = {
    hideMounts = true;
    directories = [
+     "/docker"
      "/etc/nixos"
      "/var/log"
      "/var/lib/bluetooth"
@@ -138,6 +139,7 @@
    pkgs.dunst
    pkgs.clipse
    wl-clipboard
+   wine-staging
  ];
 
  systemd.sleep.extraConfig = ''
@@ -208,5 +210,18 @@
  programs.zsh.enable = true;
 
  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+ programs.steam = {
+  enable = true;
+  remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+  dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+  localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+ };
+
+  virtualisation.docker.enable = true;
+  virtualisation.docker.storageDriver = "btrfs";
+  virtualisation.docker.daemon.settings = {
+    data-root = "/docker";
+  };
 
 }
